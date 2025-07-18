@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk17'               // 등록된 이름과 일치해야 함
+        jdk 'JDK17'               // 등록된 이름과 일치해야 함
         gradle 'gradle-8.7'       // 등록된 이름과 일치해야 함
     }
 
