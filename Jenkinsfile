@@ -38,14 +38,15 @@ pipeline {
 
         stage('Deploy & Run') {
             steps {
-                // 1. 이전에 실행되던 애플리케이션 종료 (포트 8089 기준)
-                bat '@for /f "tokens=5" %%a in (\'netstat -aon ^| findstr :8089 ^| findstr LISTENING\') do @taskkill /f /pid %%a'
+                // 1. 이전에 실행되던 애플리케이션 종료 (포트 8080 기준으로 변경)
+                bat '@for /f "tokens=5" %%a in (\'netstat -aon ^| findstr :8080 ^| findstr LISTENING\') do @taskkill /f /pid %%a'
 
                 // 2. 새로운 애플리케이션을 백그라운드에서 실행
                 // Jenkins 환경 변수를 Java 시스템 프로퍼티(-D 옵션)로 전달합니다.
-                // 이렇게 하면 application.properties의 설정을 덮어쓰게 됩니다.
+                // -Dserver.port=8080 을 추가하여 애플리케이션 포트를 명시적으로 지정합니다.
                 bat '''
                     start "Spring Boot App" java ^
+                    -Dserver.port=8080 ^
                     -Dspring.datasource.url=jdbc:mysql://%DB_HOST%/%DB_NAME% ^
                     -Dspring.datasource.username=%DB_USER% ^
                     -Dspring.datasource.password=%DB_PASS% ^
