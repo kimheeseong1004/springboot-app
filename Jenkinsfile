@@ -51,17 +51,16 @@ pipeline {
                     )
 
                     echo.
-                    echo [CI] Starting new Spring Boot application in the background...
+                    echo [CI] Starting new Spring Boot application in the background using PowerShell...
                     echo [CI] Application log will be written to: %LOG_FILE%
 
-                    rem -D 옵션을 제거하여 수동 실행과 동일한 명령어로 변경합니다.
-                    rem 이제 애플리케이션은 application.properties 파일의 설정만 사용합니다.
-                    start /B "Spring Boot App" java -jar build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar > %LOG_FILE% 2>&1
+                    rem PowerShell의 Start-Process를 사용하여 더 안정적으로 백그라운드 프로세스를 실행합니다.
+                    powershell -Command "Start-Process java -ArgumentList '-jar', 'build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar' -RedirectStandardOutput '%LOG_FILE%' -RedirectStandardError '%LOG_FILE%' -WindowStyle Hidden"
 
                     echo.
-                    echo [CI] Waiting for 5 seconds for the application to start...
-                    rem Using ping for a reliable delay instead of timeout
-                    ping -n 6 127.0.0.1 > NUL
+                    echo [CI] Waiting for 10 seconds for the application to start...
+                    rem 안정성을 위해 대기 시간을 10초로 늘립니다.
+                    ping -n 11 127.0.0.1 > NUL
 
                     echo.
                     echo [CI] Checking if the application is running on port 8080...
