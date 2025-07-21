@@ -54,12 +54,9 @@ pipeline {
                     echo [CI] Starting new Spring Boot application in the background...
                     echo [CI] Application log will be written to: %LOG_FILE%
 
-                    start /B "Spring Boot App" java ^
-                    -Dserver.port=8080 ^
-                    -Dspring.datasource.url=jdbc:mysql://%DB_HOST%/%DB_NAME% ^
-                    -Dspring.datasource.username=%DB_USER% ^
-                    -Dspring.datasource.password=%DB_PASS% ^
-                    -jar build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar > %LOG_FILE% 2>&1
+                    rem -D 옵션을 제거하여 수동 실행과 동일한 명령어로 변경합니다.
+                    rem 이제 애플리케이션은 application.properties 파일의 설정만 사용합니다.
+                    start /B "Spring Boot App" java -jar build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar > %LOG_FILE% 2>&1
 
                     echo.
                     echo [CI] Waiting for 5 seconds for the application to start...
