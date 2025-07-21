@@ -51,15 +51,16 @@ pipeline {
                     )
 
                     echo.
-                    echo [CI] Starting new Spring Boot application in the background using PowerShell...
+                    echo [CI] Starting new Spring Boot application in the background...
                     echo [CI] Application log will be written to: %LOG_FILE%
 
-                    rem PowerShell의 Start-Process를 사용하여 더 안정적으로 백그라운드 프로세스를 실행합니다.
-                    powershell -Command "Start-Process java -ArgumentList '-jar', 'build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar' -RedirectStandardOutput '%LOG_FILE%' -RedirectStandardError '%LOG_FILE%' -WindowStyle Hidden"
+                    rem PowerShell 대신 더 안정적인 cmd의 start 명령어를 사용합니다.
+                    rem cmd /c "..." 구문을 사용하여 Jenkins 프로세스와 완전히 분리된 새 프로세스를 시작합니다.
+                    start "Spring Boot App" /B cmd /c "java -jar build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar > %LOG_FILE% 2>&1"
 
                     echo.
                     echo [CI] Waiting for 10 seconds for the application to start...
-                    rem 안정성을 위해 대기 시간을 10초로 늘립니다.
+                    rem Using ping for a reliable delay instead of timeout
                     ping -n 11 127.0.0.1 > NUL
 
                     echo.
