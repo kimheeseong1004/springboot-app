@@ -4,7 +4,7 @@ pipeline {
     tools {
         // Jenkins 설정과 일치하는 JDK, Gradle 이름 사용
         jdk 'JDK17'
-        gradle 'gradle' 
+        gradle 'gradle-8.7' 
     }
 
     environment {
