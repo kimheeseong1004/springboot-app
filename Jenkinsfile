@@ -2,15 +2,18 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17'               // 등록된 이름과 일치해야 함
-        gradle 'gradle-8.7'       // 등록된 이름과 일치해야 함
+        // Jenkins 설정과 일치하는 JDK, Gradle 이름 사용
+        jdk 'JDK17'
+        gradle 'gradle' 
     }
 
     environment {
-        DB_HOST = "${env.DB_HOST}"
-        DB_NAME = "${env.DB_NAME}"
-        DB_USER = "${env.DB_USER}"
-        DB_PASS = "${env.DB_PASS}"
+        // Jenkins 파이프라인 설정에서 이 변수들의 값을 지정해야 합니다.
+        // 예: DB_USER = credentials('db-credentials-id')
+        DB_HOST = "localhost:3306"
+        DB_NAME = "myapp"
+        DB_USER = "jenkins"
+        DB_PASS = "jenkins123"
     }
 
     stages {
@@ -23,7 +26,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'gradle clean build'      // ✅ gradle 호출은 문자열 아님, 쉘 명령으로
+                bat 'gradle clean build'
             }
         }
 
@@ -33,9 +36,21 @@ pipeline {
             }
         }
 
-        stage('Run') {
+        stage('Deploy & Run') {
             steps {
-                bat 'java -jar build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar'
+                // 1. 이전에 실행되던 애플리케이션 종료 (포트 8089 기준)
+                bat '@for /f "tokens=5" %%a in (\'netstat -aon ^| findstr :8089 ^| findstr LISTENING\') do @taskkill /f /pid %%a'
+
+                // 2. 새로운 애플리케이션을 백그라운드에서 실행
+                // Jenkins 환경 변수를 Java 시스템 프로퍼티(-D 옵션)로 전달합니다.
+                // 이렇게 하면 application.properties의 설정을 덮어쓰게 됩니다.
+                bat '''
+                    start "Spring Boot App" java ^
+                    -Dspring.datasource.url=jdbc:mysql://%DB_HOST%/%DB_NAME% ^
+                    -Dspring.datasource.username=%DB_USER% ^
+                    -Dspring.datasource.password=%DB_PASS% ^
+                    -jar build\\libs\\springboot-app-0.0.1-SNAPSHOT.jar
+                '''
             }
         }
     }
